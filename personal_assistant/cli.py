@@ -37,21 +37,24 @@ CONTACT_FIELDS = [
 
 # Скорочення команд: коротка назва -> повна назва команди
 ALIASES = {
-    "ac": "add-contact",
-    "lc": "contacts",
-    "ec": "edit-contact",
-    "dc": "delete-contact",
-    "sc": "search-contact",
-    "gc": "sort-contacts",
-    "bd": "birthdays",
-    "an": "add-note",
-    "ln": "notes",
-    "en": "edit-note",
-    "dn": "delete-note",
-    "sn": "search-note",
-    "ft": "find-tag",
-    "gn": "sort-notes",
-    "cn": "contact-notes",
+    # Контакти
+    "a": "add-contact",
+    "l": "contacts",
+    "e": "edit-contact",
+    "d": "delete-contact",
+    "s": "search-contact",
+    "g": "sort-contacts",
+    "b": "birthdays",
+    # Нотатки: префікс n + літера
+    "na": "add-note",
+    "nl": "notes",
+    "ne": "edit-note",
+    "nd": "delete-note",
+    "ns": "search-note",
+    "nt": "find-tag",
+    "ng": "sort-notes",
+    "nc": "contact-notes",
+    # Загальні
     "h": "help",
     "q": "exit",
 }
@@ -422,16 +425,32 @@ class PersonalAssistant:
         return False
 
     def show_help(self):
-        print("Доступні команди (у дужках — скорочення):")
-        # Зворотна таблиця: повна назва -> список її скорочень
+        """Довідка, розділена на контакти, нотатки і загальні команди."""
+        # Зворотна таблиця: повна назва -> її скорочення
         short_names = {}
         for short, full in ALIASES.items():
             short_names.setdefault(full, []).append(short)
-        for command, (description, _) in self.commands.items():
-            shorts = ", ".join(short_names.get(command, []))
-            label = f"{command} ({shorts})" if shorts else command
-            print(f"  {label:<30} {description}")
-        print(f"  {'exit (q)':<30} Вихід з програми")
+
+        sections = [
+            ("Контакти", [
+                "add-contact", "contacts", "edit-contact", "delete-contact",
+                "search-contact", "sort-contacts", "birthdays",
+            ]),
+            ("Нотатки", [
+                "add-note", "notes", "edit-note", "delete-note",
+                "search-note", "find-tag", "sort-notes", "contact-notes",
+            ]),
+            ("Загальні", ["help"]),
+        ]
+        print("Доступні команди (у дужках — скорочення):")
+        for title, commands in sections:
+            print(f"\n{title}:")
+            for command in commands:
+                description = self.commands[command][0]
+                shorts = ", ".join(short_names.get(command, []))
+                label = f"{command} ({shorts})"
+                print(f"  {label:<30} {description}")
+        print("\nВихід з програми: exit (q)")
         return False
 
 

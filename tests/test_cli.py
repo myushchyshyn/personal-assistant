@@ -57,9 +57,9 @@ class CliTests(unittest.TestCase):
         self.assertIn("Купити молоко", output)
 
     def test_short_aliases_work_like_full_commands(self):
-        # ac — скорочення add-contact, q — скорочення exit
+        # a — скорочення add-contact, q — скорочення exit
         answers = [
-            "ac", "Анна", "Коваль", "Київ", "0501234567", "друзі",
+            "a", "Анна", "Коваль", "Київ", "0501234567", "друзі",
             "", "", "q",
         ]
         assistant, output = run_session(answers, self.data_file)
