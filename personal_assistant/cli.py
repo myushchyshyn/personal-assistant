@@ -65,6 +65,17 @@ NOTE_FIELDS = [
 ]
 
 
+def read_line(prompt):
+    """Читає рядок з клавіатури. Некоректні байти дають помилку, не падіння."""
+    try:
+        return input(prompt)
+    except UnicodeDecodeError:
+        raise ValueError(
+            "Термінал надіслав некоректні символи. "
+            "Перевірте, що він працює в кодуванні UTF-8."
+        ) from None
+
+
 def ask_field(label, field_class, skip_hint=None):
     """Питає значення, доки воно не пройде перевірку поля field_class.
 
@@ -75,7 +86,7 @@ def ask_field(label, field_class, skip_hint=None):
     else:
         prompt = f"{label} (Enter — {skip_hint}): "
     while True:
-        raw = input(prompt).strip()
+        raw = read_line(prompt).strip()
         if not raw and skip_hint is not None:
             return None
         try:
@@ -94,7 +105,7 @@ def pick_by_number(items, raw):
 
 def confirm(question):
     """Просить підтвердити дію. Повертає True, якщо відповідь «так»."""
-    answer = input(f"{question} (так/ні): ").strip().lower()
+    answer = read_line(f"{question} (так/ні): ").strip().lower()
     return answer in ("так", "т", "yes", "y")
 
 
@@ -145,10 +156,13 @@ class PersonalAssistant:
         print("Введіть help, щоб побачити список команд, або exit для виходу.")
         while True:
             try:
-                command = input("\nКоманда: ").strip().lower()
+                command = read_line("\nКоманда: ").strip().lower()
             except (EOFError, KeyboardInterrupt):
                 print("\nДо побачення!")
                 break
+            except ValueError as error:
+                print(f"Помилка: {error}")
+                continue
             # Скорочення замінюємо на повну назву команди
             command = ALIASES.get(command, command)
             if command in EXIT_COMMANDS:
@@ -184,7 +198,7 @@ class PersonalAssistant:
 
     def ask_contact(self):
         """Питає повне ім'я і повертає знайдений контакт."""
-        full_name = input("Повне ім'я контакту (Ім'я Прізвище): ").strip()
+        full_name = read_line("Повне ім'я контакту (Ім'я Прізвище): ").strip()
         record = self.contacts.find(full_name)
         if record is None:
             raise ValueError("Контакт з таким ім'ям не знайдено.")
@@ -214,7 +228,7 @@ class PersonalAssistant:
         print(record)
         for number, (_, label, _) in enumerate(CONTACT_FIELDS, start=1):
             print(f"  {number}. {label}")
-        choice = input("Номер поля (Enter — скасувати): ").strip()
+        choice = read_line("Номер поля (Enter — скасувати): ").strip()
         if not choice:
             return False
         field, label, field_class = pick_by_number(CONTACT_FIELDS, choice)
@@ -248,7 +262,7 @@ class PersonalAssistant:
         return True
 
     def search_contacts(self):
-        query = input("Що шукаємо (ім'я, телефон, email, тег…): ").strip()
+        query = read_line("Що шукаємо (ім'я, телефон, email, тег…): ").strip()
         if not query:
             raise ValueError("Пошуковий запит не може бути порожнім.")
         found = self.contacts.search(query)
@@ -270,7 +284,7 @@ class PersonalAssistant:
 
     def show_birthdays(self):
         """Контакти, у яких день народження через задану кількість днів."""
-        raw = input("Через скільки днів (0 — сьогодні): ").strip()
+        raw = read_line("Через скільки днів (0 — сьогодні): ").strip()
         if not raw.isdigit():
             raise ValueError("Введіть ціле число днів, 0 або більше.")
         found = self.contacts.upcoming_birthdays(int(raw))
@@ -291,7 +305,7 @@ class PersonalAssistant:
 
     def ask_note(self):
         """Питає номер нотатки і повертає її."""
-        raw = input("Номер нотатки: ").strip()
+        raw = read_line("Номер нотатки: ").strip()
         if not raw.isdigit():
             raise ValueError("Номер нотатки має бути числом.")
         note = self.notes.find(int(raw))
@@ -306,7 +320,9 @@ class PersonalAssistant:
         tags = ask_field("Теги з # (наприклад, #робота #ідеї)", NoteTags,
                          "пропустити")
         contact_name = None
-        link = input("Ім'я контакту для прив'язки (Enter — без прив'язки): ")
+        link = read_line(
+            "Ім'я контакту для прив'язки (Enter — без прив'язки): "
+        )
         if link.strip():
             contact_name = self.get_contact(link).full_name
         note = self.notes.add(title, text, tags, contact_name)
@@ -329,11 +345,11 @@ class PersonalAssistant:
         print("  2. Текст")
         print("  3. Теги")
         print("  4. Прив'язка до контакту")
-        choice = input("Номер поля (Enter — скасувати): ").strip()
+        choice = read_line("Номер поля (Enter — скасувати): ").strip()
         if not choice:
             return False
         if choice == "4":
-            link = input(
+            link = read_line(
                 "Ім'я контакту (Enter — без змін, «-» — відв'язати): "
             )
             link = link.strip()
@@ -363,7 +379,7 @@ class PersonalAssistant:
         return True
 
     def search_notes(self):
-        query = input("Що шукаємо в нотатках: ").strip()
+        query = read_line("Що шукаємо в нотатках: ").strip()
         if not query:
             raise ValueError("Пошуковий запит не може бути порожнім.")
         found = self.notes.search(query)
@@ -375,7 +391,7 @@ class PersonalAssistant:
 
     def find_notes_by_tag(self):
         """Нотатки з одним конкретним тегом."""
-        raw = input("Тег для пошуку (наприклад, #робота): ")
+        raw = read_line("Тег для пошуку (наприклад, #робота): ")
         tags = NoteTags(raw).value or []
         if len(tags) != 1:
             raise ValueError("Введіть один тег, наприклад #робота.")

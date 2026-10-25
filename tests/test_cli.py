@@ -66,6 +66,13 @@ class CliTests(unittest.TestCase):
         self.assertIsNotNone(assistant.contacts.find("Анна Коваль"))
         self.assertIn("До побачення", output)
 
+    def test_bad_terminal_bytes_do_not_stop_program(self):
+        # Некоректні байти з терміналу мають дати повідомлення, а не падіння
+        bad_bytes = UnicodeDecodeError("utf-8", b"\xd1", 0, 1, "invalid")
+        _, output = run_session([bad_bytes, "exit"], self.data_file)
+        self.assertIn("кодуванні UTF-8", output)
+        self.assertIn("До побачення", output)
+
     def test_unknown_command_does_not_stop_program(self):
         _, output = run_session(["абракадабра", "help", "exit"],
                                 self.data_file)
