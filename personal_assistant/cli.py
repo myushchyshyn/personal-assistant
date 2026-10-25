@@ -68,14 +68,35 @@ NOTE_FIELDS = [
 ]
 
 
-def read_line(prompt):
-    """Читає рядок з клавіатури. Некоректні байти дають помилку, не падіння."""
+def fix_encoding(text):
+    """Повертає введений текст у правильному вигляді.
+
+    Якщо термінал надіслав не UTF-8, а cp1251 (типово для Windows-клієнтів),
+    байти читаються як сурогати (errors="surrogateescape") і тут
+    перекодовуються назад у cp1251.
+    """
+    raw = text.encode("utf-8", "surrogateescape")
     try:
-        return input(prompt)
+        return raw.decode("utf-8")
+    except UnicodeDecodeError:
+        pass
+    try:
+        return raw.decode("cp1251")
+    except UnicodeDecodeError:
+        raise ValueError(
+            "Не вдалося прочитати символи. "
+            "Перевірте кодування терміналу: UTF-8 або cp1251."
+        ) from None
+
+
+def read_line(prompt):
+    """Читає рядок з клавіатури і виправляє кодування, якщо треба."""
+    try:
+        return fix_encoding(input(prompt))
     except UnicodeDecodeError:
         raise ValueError(
             "Термінал надіслав некоректні символи. "
-            "Перевірте, що він працює в кодуванні UTF-8."
+            "Перевірте, що він працює в кодуванні UTF-8 або cp1251."
         ) from None
 
 
@@ -464,6 +485,9 @@ class PersonalAssistant:
 
 def main():
     """Точка входу. Файл даних можна задати змінною PA_DATA_FILE."""
+    # Байти, які не є UTF-8, передаються далі як сурогати, а не валять програму
+    if hasattr(sys.stdin, "reconfigure"):
+        sys.stdin.reconfigure(errors="surrogateescape")
     data_file = os.environ.get("PA_DATA_FILE", DATA_FILE)
     try:
         assistant = PersonalAssistant(data_file)

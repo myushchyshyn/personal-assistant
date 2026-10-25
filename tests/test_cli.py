@@ -7,7 +7,7 @@ import unittest
 from pathlib import Path
 from unittest import mock
 
-from personal_assistant.cli import PersonalAssistant
+from personal_assistant.cli import PersonalAssistant, fix_encoding
 
 
 def run_session(answers, data_file):
@@ -18,6 +18,17 @@ def run_session(answers, data_file):
             contextlib.redirect_stdout(output):
         assistant.run()
     return assistant, output.getvalue()
+
+
+class FixEncodingTests(unittest.TestCase):
+    def test_utf8_text_is_unchanged(self):
+        self.assertEqual(fix_encoding("вул. Бальзака 61"), "вул. Бальзака 61")
+
+    def test_cp1251_bytes_are_decoded(self):
+        # Термінал надіслав cp1251: байти читаються як сурогати
+        raw = "вул. Бальзака".encode("cp1251")
+        text = raw.decode("utf-8", "surrogateescape")
+        self.assertEqual(fix_encoding(text), "вул. Бальзака")
 
 
 class CliTests(unittest.TestCase):
