@@ -56,6 +56,16 @@ class CliTests(unittest.TestCase):
         assistant, output = run_session(["notes", "exit"], self.data_file)
         self.assertIn("Купити молоко", output)
 
+    def test_short_aliases_work_like_full_commands(self):
+        # ac — скорочення add-contact, q — скорочення exit
+        answers = [
+            "ac", "Анна", "Коваль", "Київ", "0501234567", "друзі",
+            "", "", "q",
+        ]
+        assistant, output = run_session(answers, self.data_file)
+        self.assertIsNotNone(assistant.contacts.find("Анна Коваль"))
+        self.assertIn("До побачення", output)
+
     def test_unknown_command_does_not_stop_program(self):
         _, output = run_session(["абракадабра", "help", "exit"],
                                 self.data_file)

@@ -35,6 +35,28 @@ CONTACT_FIELDS = [
     ("birthday", "День народження ДД.ММ.РРРР", Birthday),
 ]
 
+# Скорочення команд: коротка назва -> повна назва команди
+ALIASES = {
+    "ac": "add-contact",
+    "lc": "contacts",
+    "ec": "edit-contact",
+    "dc": "delete-contact",
+    "sc": "search-contact",
+    "gc": "sort-contacts",
+    "bd": "birthdays",
+    "an": "add-note",
+    "ln": "notes",
+    "en": "edit-note",
+    "dn": "delete-note",
+    "sn": "search-note",
+    "ft": "find-tag",
+    "gn": "sort-notes",
+    "cn": "contact-notes",
+    "h": "help",
+    "q": "exit",
+}
+EXIT_COMMANDS = ("exit",)
+
 # Поля нотатки, які можна редагувати (прив'язку до контакту — окремо)
 NOTE_FIELDS = [
     ("title", "Заголовок", Title),
@@ -127,7 +149,9 @@ class PersonalAssistant:
             except (EOFError, KeyboardInterrupt):
                 print("\nДо побачення!")
                 break
-            if command == "exit":
+            # Скорочення замінюємо на повну назву команди
+            command = ALIASES.get(command, command)
+            if command in EXIT_COMMANDS:
                 print("До побачення!")
                 break
             if not command:
@@ -382,10 +406,16 @@ class PersonalAssistant:
         return False
 
     def show_help(self):
-        print("Доступні команди:")
+        print("Доступні команди (у дужках — скорочення):")
+        # Зворотна таблиця: повна назва -> список її скорочень
+        short_names = {}
+        for short, full in ALIASES.items():
+            short_names.setdefault(full, []).append(short)
         for command, (description, _) in self.commands.items():
-            print(f"  {command:<16} {description}")
-        print(f"  {'exit':<16} Вихід з програми")
+            shorts = ", ".join(short_names.get(command, []))
+            label = f"{command} ({shorts})" if shorts else command
+            print(f"  {label:<30} {description}")
+        print(f"  {'exit (q)':<30} Вихід з програми")
         return False
 
 
