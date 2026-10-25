@@ -153,7 +153,7 @@ class PersonalAssistant:
     def run(self):
         """Головний цикл: читає команду, виконує її, повторює до exit."""
         print("Ласкаво просимо до «Персональний помічник»!")
-        print("Введіть help, щоб побачити список команд, або exit для виходу.")
+        print("Введіть help (h), щоб побачити список команд, або exit (q) для виходу.")
         while True:
             try:
                 command = read_line("\nКоманда: ").strip().lower()
@@ -171,7 +171,7 @@ class PersonalAssistant:
             if not command:
                 continue
             if command not in self.commands:
-                print("Невідома команда. Введіть help, щоб побачити список.")
+                print("Невідома команда. Введіть help (h), щоб побачити список.")
                 continue
             self.execute(self.commands[command][1])
 
