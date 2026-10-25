@@ -31,7 +31,7 @@ CONTACT_FIELDS = [
     ("last_name", "Прізвище", LastName),
     ("address", "Адреса", Address),
     ("phone", f"Телефон ({PHONE_TEMPLATE})", Phone),
-    ("tag", "Тег контакту (наприклад, сім'я або робота)", ContactTag),
+    ("tag", "Тег контакту (наприклад, #сім'я або #робота)", ContactTag),
     ("email", "Email", Email),
     ("birthday", "День народження ДД.ММ.РРРР", Birthday),
 ]

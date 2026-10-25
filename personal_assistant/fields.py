@@ -19,6 +19,8 @@ EMAIL_PATTERN = re.compile(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}")
 NAME_PATTERN = re.compile(r"[^\W\d_]+(?:[ '\-][^\W\d_]+)*")
 # Тег нотатки: символ # і далі літери, цифри або підкреслення
 NOTE_TAG_PATTERN = re.compile(r"#\w+")
+# Тег контакту: символ # і далі літери, цифри, підкреслення або апостроф
+CONTACT_TAG_PATTERN = re.compile(r"#[\w']+")
 
 
 class Field:
@@ -117,15 +119,18 @@ class Address(TextField):
 
 
 class ContactTag(TextField):
-    """Тег контакту для групування: одне слово без пробілів."""
+    """Тег контакту для групування: один тег з # на початку, як #друзі."""
 
     label = "Тег"
 
     def validate(self, raw_value):
         text = super().validate(raw_value)
-        if len(text.split()) != 1:
-            raise ValueError("Тег має бути одним словом без пробілів.")
-        # Нижній регістр, щоб «Робота» і «робота» потрапили в одну групу
+        if not CONTACT_TAG_PATTERN.fullmatch(text):
+            raise ValueError(
+                "Тег має починатися з # і складатися з одного слова, "
+                "наприклад #друзі."
+            )
+        # Нижній регістр, щоб «#Робота» і «#робота» потрапили в одну групу
         return text.lower()
 
 

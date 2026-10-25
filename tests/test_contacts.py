@@ -6,7 +6,7 @@ from datetime import date
 from personal_assistant.contacts import AddressBook, Record
 
 
-def make_record(first="Анна", last="Коваль", tag="друзі", phone="0501234567",
+def make_record(first="Анна", last="Коваль", tag="#друзі", phone="0501234567",
                 birthday=None, email=None):
     """Створює контакт із типовими значеннями для тестів."""
     return Record(first, last, "Київ, вул. Хрещатик, 1", phone, tag,
@@ -38,8 +38,8 @@ class RecordTests(unittest.TestCase):
 class AddressBookTests(unittest.TestCase):
     def setUp(self):
         self.book = AddressBook()
-        self.book.add_record(make_record("Анна", "Коваль", tag="друзі"))
-        self.book.add_record(make_record("Петро", "Сидоренко", tag="робота",
+        self.book.add_record(make_record("Анна", "Коваль", tag="#друзі"))
+        self.book.add_record(make_record("Петро", "Сидоренко", tag="#робота",
                                          phone="0671112233"))
 
     def test_duplicate_name_is_rejected(self):
@@ -56,7 +56,7 @@ class AddressBookTests(unittest.TestCase):
 
     def test_group_by_tag_is_sorted(self):
         groups = self.book.group_by_tag()
-        self.assertEqual(list(groups), ["друзі", "робота"])
+        self.assertEqual(list(groups), ["#друзі", "#робота"])
 
     def test_rename_needs_rebuild_keys(self):
         record = self.book.find("Анна Коваль")

@@ -26,7 +26,7 @@ class StorageTests(unittest.TestCase):
     def test_data_survives_restart(self):
         contacts = AddressBook()
         contacts.add_record(Record("Анна", "Коваль", "Київ", "0501234567",
-                                   "друзі", email="anna@example.com"))
+                                   "#друзі", email="anna@example.com"))
         notes = NoteBook()
         notes.add("Заголовок", "Текст", "#тест", "Анна Коваль")
         save_data(contacts, notes, self.path)

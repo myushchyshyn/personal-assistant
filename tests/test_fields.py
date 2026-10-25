@@ -108,12 +108,14 @@ class AutoCorrectionTests(unittest.TestCase):
 
 
 class ContactTagTests(unittest.TestCase):
-    def test_tag_is_lowercase_single_word(self):
-        self.assertEqual(ContactTag("Робота").value, "робота")
+    def test_tag_is_lowercase_with_hash(self):
+        self.assertEqual(ContactTag("#Робота").value, "#робота")
+        self.assertEqual(ContactTag("#сім'я").value, "#сім'я")
 
-    def test_tag_with_spaces_is_rejected(self):
-        with self.assertRaises(ValueError):
-            ContactTag("два слова")
+    def test_tag_without_hash_is_rejected(self):
+        for raw in ("робота", "два слова", "#два слова", "#"):
+            with self.subTest(raw=raw), self.assertRaises(ValueError):
+                ContactTag(raw)
 
 
 class NoteTagsTests(unittest.TestCase):
