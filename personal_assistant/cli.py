@@ -93,10 +93,14 @@ def ask_field(label, field_class, skip_hint=None):
         if not raw and skip_hint is not None:
             return None
         try:
-            field_class(raw)  # перевірка; сам запис створить Record або Note
-            return raw
+            field = field_class(raw)  # перевірка; запис створить Record/Note
         except ValueError as error:
             print(f"Помилка: {error} Спробуйте ще раз.")
+            continue
+        # Показуємо, що програма виправила сама (велика літера, +380 тощо)
+        for correction in field.corrections:
+            print(f"Виправлено автоматично: {correction}")
+        return raw
 
 
 def pick_by_number(items, raw):
@@ -186,6 +190,10 @@ class PersonalAssistant:
             print(f"Помилка: {error}")
         except KeyboardInterrupt:
             print("\nДію скасовано.")
+        except EOFError:
+            # Ctrl+D посеред введення: завершуємо програму без помилки
+            print("\nДо побачення!")
+            raise SystemExit(0) from None
         else:
             if changed:
                 self.save()

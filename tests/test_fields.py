@@ -8,6 +8,7 @@ from personal_assistant.fields import (
     ContactTag,
     Email,
     FirstName,
+    LastName,
     NoteTags,
     Phone,
     format_phone,
@@ -82,6 +83,28 @@ class NameTests(unittest.TestCase):
         for raw in ("Ann3", "", "   "):
             with self.subTest(raw=raw), self.assertRaises(ValueError):
                 FirstName(raw)
+
+
+class AutoCorrectionTests(unittest.TestCase):
+    def test_name_gets_capital_letters(self):
+        self.assertEqual(FirstName("анна").value, "Анна")
+        self.assertEqual(FirstName("анна-марія").value, "Анна-Марія")
+        self.assertEqual(LastName("о'нил").value, "О'Нил")
+        self.assertEqual(LastName("коваль шевченко").value, "Коваль Шевченко")
+
+    def test_name_correction_is_reported(self):
+        self.assertEqual(len(FirstName("анна").corrections), 1)
+        self.assertEqual(FirstName("Анна").corrections, [])
+
+    def test_phone_without_code_is_reported(self):
+        self.assertEqual(
+            Phone("501234567").corrections,
+            ["номер без коду країни: додано +380 автоматично"],
+        )
+        self.assertEqual(len(Phone("0501234567").corrections), 1)
+
+    def test_full_phone_is_not_corrected(self):
+        self.assertEqual(Phone("+380501234567").corrections, [])
 
 
 class ContactTagTests(unittest.TestCase):

@@ -27,6 +27,8 @@ class Field:
     optional = False
 
     def __init__(self, raw_value):
+        # Тут збираємо повідомлення про автоматичні виправлення введення
+        self.corrections = []
         # validate() перевіряє значення і повертає його у потрібному вигляді
         self.value = self.validate(raw_value)
 
@@ -66,6 +68,17 @@ class TextField(Field):
         return text
 
 
+def capitalize_name(text):
+    """Велика літера на початку кожного слова: «анна-марія» → «Анна-Марія»."""
+    # Велика літера там, де починається слово: на початку рядка або
+    # після пробілу, дефіса чи апострофа
+    return re.sub(
+        r"(^|[ '\-])([^\W\d_])",
+        lambda match: match.group(1) + match.group(2).upper(),
+        text,
+    )
+
+
 class Name(TextField):
     """Ім'я або прізвище: лише літери, можливі пробіл, дефіс і апостроф."""
 
@@ -76,7 +89,13 @@ class Name(TextField):
                 f"«{self.label}» має містити лише літери "
                 "(можна пробіл, дефіс або апостроф)."
             )
-        return text
+        # Автоматично виправляємо малу літеру на велику і повідомляємо про це
+        fixed = capitalize_name(text)
+        if fixed != text:
+            self.corrections.append(
+                f"«{text}» → «{fixed}» (велика літера на початку слова)"
+            )
+        return fixed
 
 
 class FirstName(Name):
@@ -140,6 +159,18 @@ class Phone(Field):
     label = "Телефон"
 
     def validate(self, raw_value):
+        digits = re.sub(r"\D", "", raw_value)
+        # Про автоматичне доповнення повідомляємо, щоб користувач бачив його
+        if len(digits) == 9:
+            self.corrections.append(
+                "номер без коду країни: додано +380 автоматично"
+            )
+        elif len(digits) == 10 and digits.startswith("0"):
+            self.corrections.append(
+                "номер з 0 на початку: 0 замінено на +380 автоматично"
+            )
+        elif len(digits) == 12 and not raw_value.strip().startswith("+"):
+            self.corrections.append("додано знак + перед номером")
         return normalize_phone(raw_value)
 
     def __str__(self):
