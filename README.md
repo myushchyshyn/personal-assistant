@@ -87,6 +87,41 @@ python3 -m personal_assistant
 
 ---
 
+## Запуск з будь-якого місця
+
+Найзручніший варіант: встановити пакет через `pipx`. Тоді команда `assistant`
+працює з будь-якої папки, без активації віртуального оточення.
+
+```bash
+# Один раз: встановлення (з папки проєкту або з повного шляху)
+pipx install /home/m/personal-assistant
+
+# Після цього з будь-якої папки:
+cd ~
+assistant
+```
+
+Оновлення після змін у коді:
+
+```bash
+pipx install --force /home/m/personal-assistant
+```
+
+### Коротка команда `pa` (fish)
+
+Щоб запускати програму коротким словом `pa`, додайте в fish alias на
+команду `assistant`. Не на `python3 -m personal_assistant`: той варіант
+працює лише з папки проєкту.
+
+```fish
+# Для поточної сесії
+alias pa assistant
+
+# Назавжди: додайте той самий рядок у ~/.config/fish/config.fish
+```
+
+Якщо alias `pa` уже вказує на `python3 -m personal_assistant`, замініть його.
+
 ## Де зберігаються дані
 
 За замовчуванням файл даних: `~/.personal_assistant/data.pkl`.
