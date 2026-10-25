@@ -2,6 +2,7 @@
 
 from collections import UserDict, defaultdict
 
+from .colors import paint_tag
 from .fields import NoteTags, TextField
 
 
@@ -51,7 +52,7 @@ class Note:
         return any(query in text.lower() for text in texts)
 
     def __str__(self):
-        tags = " ".join(self.tags) or "-"
+        tags = " ".join(paint_tag(tag) for tag in self.tags) or "-"
         contact = self.contact_name or "-"
         return (
             f"[{self.note_id}] {self.title}\n"

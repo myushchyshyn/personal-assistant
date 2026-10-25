@@ -7,6 +7,7 @@
 from collections import UserDict, defaultdict
 from datetime import date
 
+from .colors import paint_tag
 from .fields import (
     Address,
     Birthday,
@@ -77,7 +78,7 @@ class Record:
             f"  Телефон: {self.phone}\n"
             f"  Email: {str(self.email) or '-'}\n"
             f"  День народження: {str(self.birthday) or '-'}\n"
-            f"  Тег: {self.tag}"
+            f"  Тег: {paint_tag(str(self.tag))}"
         )
 
 

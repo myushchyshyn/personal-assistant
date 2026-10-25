@@ -9,6 +9,7 @@ import copy
 import os
 import sys
 
+from .colors import paint_tag
 from .contacts import AddressBook, Record
 from .fields import (
     PHONE_TEMPLATE,
@@ -310,7 +311,7 @@ class PersonalAssistant:
             print("Контактів ще немає.")
             return False
         for tag, records in self.contacts.group_by_tag().items():
-            print(f"\nТег: {tag}")
+            print(f"\nТег: {paint_tag(tag)}")
             print_records(records)
         return False
 
@@ -440,7 +441,7 @@ class PersonalAssistant:
             print("Нотаток ще немає.")
             return False
         for tag, notes in self.notes.group_by_tags().items():
-            print(f"\n{tag} ({len(notes)})")
+            print(f"\n{paint_tag(tag)} ({len(notes)})")
             print_notes(notes)
         return False
 
